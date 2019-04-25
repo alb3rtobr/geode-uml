@@ -1,0 +1,56 @@
+@startuml
+
+interface GemFireCache{
+  +DistributedSystem getDistributedSystem()
+}
+interface Cache
+interface ClientCache
+class CacheFactory{
+  +Cache create()
+}
+interface InternalClientCache
+class ClientCacheFactory{
+  +ClientCache create()
+}
+interface InternalCache
+
+class InternalCacheForClientAccess
+class GemFireCacheImpl
+
+interface DistributedSystem
+class InternalDistributedSystem
+
+package statistics <<Cloud>> {
+  class StatisticsManager
+}
+
+interface DistributionManager
+class ClusterDistributionManager
+class LonerDistributionManager
+
+interface DistributedMember
+class InternalDistributedMember
+
+GemFireCache ------ DistributedSystem
+DistributedSystem <|-- InternalDistributedSystem
+
+GemFireCache <|-- Cache
+GemFireCache <|-- ClientCache
+Cache -- CacheFactory
+Cache <|-- InternalCache
+ClientCache -- ClientCacheFactory
+ClientCache <|-- InternalClientCache
+InternalCache <|.. GemFireCacheImpl
+InternalClientCache <|.. GemFireCacheImpl
+InternalCache <|.. InternalCacheForClientAccess
+StatisticsManager <|.... InternalDistributedSystem
+
+InternalDistributedSystem *-- DistributionManager
+DistributionManager <|.. ClusterDistributionManager
+DistributionManager <|.. LonerDistributionManager
+
+DistributedMember <|.. InternalDistributedMember
+ClusterDistributionManager *-- InternalDistributedMember
+LonerDistributionManager *-- InternalDistributedMember
+
+@enduml

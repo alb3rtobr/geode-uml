@@ -1,0 +1,37 @@
+@startuml
+interface Region
+interface InternalRegion
+
+
+ConcurrentMap <|-- Region
+Region <|-- InternalRegion
+class AbstractRegion <<abstract>>
+InternalRegion <|.. AbstractRegion
+AbstractRegion <|-- LocalRegion
+
+interface RegionMap
+
+RegionMap "1" -right-* "1" LocalRegion
+
+class AbstractRegionMap <<abstract>>
+RegionMap <|.. AbstractRegionMap
+RegionMap <|.left.. ProxyRegionMap
+
+AbstractRegionMap "1" *-right- "1" ConcurrentMapWithReusableEntries
+interface ConcurrentMapWithReusableEntries
+ConcurrentMap <|-- ConcurrentMapWithReusableEntries
+
+ConcurrentMapWithReusableEntries <|.. CustomEntryConcurrentHashMap
+
+AbstractRegionMap <|-- VMRegionMap
+AbstractRegionMap <|-- VMLRURegionMap
+
+class LocalRegion {
+  -RegionMap entries
+}
+
+class AbstractRegionMap {
+  #ConcurrentMapWithReusableEntries map
+}
+
+@enduml

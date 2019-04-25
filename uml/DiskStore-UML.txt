@@ -1,0 +1,57 @@
+@startuml
+interface DiskStoreMXBean
+
+class DiskStoreMBean {
+-DiskStoreMBeanBridge bridge
++long getTotalBytesOnDisk()
+}
+
+class DiskStoreMBean
+note right: long getTotalBytesOnDisk(){ return bridge.getTotalBytesOnDisk(); }
+
+
+
+class DiskStoreMBeanBridge {
+
+-DirectoryHolder[] dr
++long getTotalBytesOnDisk()
+}
+
+class DiskStoreMBeanBridge {
+-DiskStore diskStore
+-DiskStoreStats diskStoreStats
+}
+note right: getTotalBytesOnDisk() returns size of each DirectoryHolder
+
+class DirectoryHolder {
++ long getCapacity()
+}
+
+interface DiskStore
+class DiskStoreImpl {
+- DiskStoreStats stats
++ DirectoryHolder[] directories
+}
+
+abstract class DiskUsage
+class LogUsage
+class DirectoryHolderUsage
+
+class DiskStoreMonitor {
+-Map<DiskStoreImpl, Set<DirectoryHolderUsage>> disks
+-LogUsage logDisk
+}
+
+DiskStoreMXBean <|.. DiskStoreMBean
+DiskStoreMBean -- DiskStoreMBeanBridge
+DiskStoreMBeanBridge *-- DiskStore
+DiskStoreMBeanBridge *-- DirectoryHolder
+
+DiskUsage <|-- LogUsage
+DiskUsage <|-- DirectoryHolderUsage
+DiskStore <|.. DiskStoreImpl
+DiskStoreImpl --* DiskStoreMonitor
+LogUsage --* DiskStoreMonitor
+DirectoryHolderUsage --* DiskStoreMonitor
+
+@enduml

@@ -1,0 +1,121 @@
+@startuml
+
+interface StatisticsTypeFactory
+
+interface StatisticsType
+note right: Cache Performance (CachePerfStats) \n\
+Cache Server (CacheServerStats) \n\
+Client-Side Notifications (CacheClientUpdaterStats) \n\
+Client-to-Server Messaging Performance (ClientStats) \n\
+Client Connection Pool (PoolStats) \n\
+Continuous Querying (CQStatistics) \n\
+Delta Propagation (DeltaPropagationStatistics) \n\
+Disk Space Usage (DiskDirStatistics) \n\
+Disk Usage and Performance (DiskRegionStatistics) \n\
+Distributed System Messaging (DistributionStats) \n\
+Distributed Lock Services (DLockStats) \n\
+Function Execution (FunctionServiceStatistics) \n\
+Gateway Queue (GatewayStatistics) \n\
+Indexes (IndexStats) \n\
+Geode JVM Resource Manager (ResourceManagerStats) \n\
+JVM Java Runtime (VMStats) \n\
+JVM Garbage Collection (VMGCStats) \n\
+JVM Garbage Collector Memory Pools (VMMemoryPoolStats) \n\
+JVM Heap Memory Usage (VMMemoryUsageStats) \n\
+Locator (LocatorStatistics) \n\
+Off-Heap (OffHeapMemoryStats) \n\
+Linux Process Performance (LinuxProcessStats) \n\
+Linux Operating System (LinuxSystemStats) \n\
+Partitioned Regions (PartitionedRegion<name>Statistics) \n\
+Region Entry Eviction – Count-Based (LRUStatistics) \n\
+Region Entry Eviction – Size-based (LRUStatistics) \n\
+Server Notifications for All Clients (CacheClientNotifierStatistics) \n\
+Server Notifications for Single Client (CacheClientProxyStatistics) \n\
+Server-to-Client Messaging Performance (ClientSubscriptionStats) \n\
+Statistics Collection (StatSampler)
+
+
+interface StatisticDescriptor
+note right: -three numeric types (int,double,long)\n-gauge or counter
+
+interface OsStatisticsManager
+
+class AbstractStatisticsFactory
+
+class DummyStatisticsFactory
+note bottom: does nothing, used when stats are disabled
+
+class LocalStatisticsFactory
+
+interface StatisticsManager
+interface StatisticsFactory
+interface Statistics
+
+
+class StatisticsTypeFactoryImpl << (S,#FF7700) Singleton >> {
+  -HashMap statTypes
+  +StatisticsType createType(String name, String description, StatisticDescriptor[] stats)
+  +StatisticDescriptor createIntGauge(String name, String description, String units)
+  +StatisticDescriptor createIntCounter(...)
+  +StatisticDescriptor createDoubleGauge(...)
+  +StatisticDescriptor createDoubleCounter(...)
+  +StatisticDescriptor createLongGauge(...)
+  +StatisticDescriptor createLongCounter(...)
+}
+
+class StatisticsTypeImpl {
+  -HashMap statsDescriptor
+}
+
+
+class StatisticDescriptorImpl {
++{static} StatisticDescriptor createIntGauge(String name, String description, String units)
++{static} StatisticDescriptor createIntCounter(...)
++{static} StatisticDescriptor createDoubleGauge(...)
++{static} StatisticDescriptor createDoubleCounter(...)
++{static} StatisticDescriptor createLongGauge(...)
++{static} StatisticDescriptor createLongCounter(...)
+}
+
+class StatisticsImpl {
+  -StatisticsTypeImpl type
+}
+
+class LocalStatisticsImpl
+
+
+
+class InternalDistributedSystem {
+  -StatisticsManager statisticsManager
+}
+
+
+
+abstract class DistributedSystem
+
+class StatisticsRegistry {
+  -List<Statistics> instances
+}
+
+
+StatisticsTypeFactory <|.... StatisticsTypeFactoryImpl
+StatisticsTypeFactory <|-- StatisticsFactory
+StatisticsTypeFactoryImpl *---- StatisticsType
+StatisticsType <|.. StatisticsTypeImpl
+StatisticsTypeImpl *-- StatisticDescriptor
+StatisticDescriptor <|.. StatisticDescriptorImpl
+StatisticsFactory <|.. AbstractStatisticsFactory
+StatisticsFactory <|... DummyStatisticsFactory
+StatisticsFactory <|... LocalStatisticsFactory
+StatisticsFactory <|... DistributedSystem
+DistributedSystem <|-- InternalDistributedSystem
+StatisticsFactory <|-- StatisticsManager
+InternalDistributedSystem *-- StatisticsManager
+OsStatisticsManager <|-- StatisticsManager
+
+StatisticsManager <|-- StatisticsRegistry
+StatisticsRegistry *-- Statistics
+Statistics <|.. StatisticsImpl
+StatisticsImpl <|-- LocalStatisticsImpl
+StatisticsImpl *-- StatisticsTypeImpl
+@enduml
