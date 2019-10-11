@@ -4,10 +4,22 @@ interface InternalRegion
 
 
 ConcurrentMap <|-- Region
+Region <|.. ProxyRegion
+Region <|.. AdminRegion
+Region <|.. LocalDataSet
 Region <|-- InternalRegion
+
+interface InternalDistributedRegion
+interface InternalPersistentRegion
 class AbstractRegion <<abstract>>
+InternalRegion <|-- InternalDistributedRegion
+InternalRegion <|-- InternalPersistentRegion
+
 InternalRegion <|.. AbstractRegion
 AbstractRegion <|-- LocalRegion
+LocalRegion <|-- DistributedRegion
+InternalPersistentRegion <|.. LocalRegion
+InternalDistributedRegion <|.. DistributedRegion
 
 interface RegionMap
 
@@ -15,7 +27,7 @@ RegionMap "1" -right-* "1" LocalRegion
 
 class AbstractRegionMap <<abstract>>
 RegionMap <|.. AbstractRegionMap
-RegionMap <|.left.. ProxyRegionMap
+RegionMap <|..right... ProxyRegionMap
 
 AbstractRegionMap "1" *-right- "1" ConcurrentMapWithReusableEntries
 interface ConcurrentMapWithReusableEntries
@@ -33,5 +45,4 @@ class LocalRegion {
 class AbstractRegionMap {
   #ConcurrentMapWithReusableEntries map
 }
-
 @enduml
