@@ -14,3 +14,6 @@ They are not 100% complete (not even close!), I just wanted to have a picture of
 
 # Cache
 ![Cache](./uml/Cache-UML.png)
+
+# Gateway Senders
+![GwSenders](./uml/GwSenders-UML.png)

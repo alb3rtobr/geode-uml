@@ -1,0 +1,53 @@
+@startuml
+class AbstractGatewaySenderEventProcessor {
+  GatewaySenderEventDispatcher dispatcher
+}
+
+interface GatewaySenderEventDispatcher
+
+AbstractGatewaySenderEventProcessor <|-- SerialGatewaySenderEventProcessor
+SerialGatewaySenderEventProcessor <|-- RemoteSerialGatewaySenderEventProcessor
+AbstractGatewaySenderEventProcessor *--- GatewaySenderEventDispatcher
+
+GatewaySenderEventDispatcher <|.. GatewaySenderEventRemoteDispatcher
+
+class GatewaySenderEventRemoteDispatcher {
+  - AbstractGatewaySender sender
+  - Connection connection
+  - AbstractGatewaySenderEventProcessor processor
+  - void initializeConnection()
+}
+
+interface InternalGatewaySender
+interface DistributionAdvisee
+
+class AbstractGatewaySender {
+  - PoolImpl proxy
+  + PoolImpl getProxy()
+}
+
+GatewaySenderEventRemoteDispatcher *-- AbstractGatewaySender
+
+InternalGatewaySender <|.. AbstractGatewaySender
+DistributionAdvisee <|.. AbstractGatewaySender
+
+class PoolImpl{
+  - ConnectionManager manager
+  +Connection acquireConnection(ServerLocation loc)
+}
+
+class ConnectionManager{
+  +Connection borrowConnection(ServerLocation server, boolean onlyUseExistingCnx)
+}
+
+AbstractGatewaySender *-- PoolImpl
+PoolImpl *-- ConnectionManager
+
+note as N1
+  ServerLocation server = this.sender.getServerLocation()
+  . . . 
+  con = this.sender.getProxy().acquireConnection(server);
+  
+end note
+GatewaySenderEventRemoteDispatcher .. N1
+@enduml
