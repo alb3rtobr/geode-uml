@@ -1,0 +1,83 @@
+@startuml
+class LocatorLoadSnapshot {
+  - Map<InternalDistributedMember, String[]> serverGroupMap 
+  - Map<String, Map<InternalDistributedMember, LoadHolder>> connectionLoadMap
+  - Map<String, Map<InternalDistributedMember, LoadHolder>> queueLoadMap
+}
+
+class LoadHolder {
+  - ServerLocation location
+}
+
+class ServerLocation {
+  -String hostName
+  -int port
+}
+
+LoadHolder *-- ServerLocation
+
+interface ConnectionManager
+class ConnectionManagerImpl {
+  ConnectionMap allConnectionsMap
+  EndpointManager endpointManager;
+}
+
+class ConnectionMap {
+  Map<Endpoint, Set<PooledConnection>> map
+}
+
+ConnectionManager <|-- ConnectionManagerImpl
+ConnectionManagerImpl *-- EndpointManager
+ConnectionManagerImpl *-- ConnectionMap
+
+class PoolImpl {
+  EndpointManager endpointManager
+  ConnectionManager manager
+  ConnectionSource source
+}
+
+PoolImpl *-- ConnectionManager
+
+interface ConnectionSource
+class AutoConnectionSourceImpl
+note bottom:"A source for discovering servers and\nfinding the least loaded server to connect to"
+ConnectionSource <|-- AutoConnectionSourceImpl
+
+PoolImpl *--- ConnectionSource
+
+interface EndpointManager {
+  Map<DistributedMember, Endpoint> getEndpointMap()
+  Map<ServerLocation, ConnectionStats> getAllStats()
+  Endpoint referenceEndpoint(ServerLocation server, DistributedMember memberId)
+}
+note top:"keeps track of which servers we are connected to\nOther parts of the client code can register listeners\nthat will be notified about when endpoints are created or died"
+
+class EndpointManagerImpl {
+  Map<DistributedMember, Endpoint> endpointMap
+  Map<ServerLocation, ConnectionStats> statMap
+  DistributedSystem ds
+  EndpointListenerBroadcaster listener
+}
+
+interface EndpointListener {
+
+}
+
+class EndpointListenerBroadcaster {
+  Set<EndpointListener> endpointListeners
+}
+
+
+class EndpointListenerForBridgeMembership
+
+EndpointListener <|-- EndpointListenerBroadcaster
+EndpointListener <|-- EndpointListenerForBridgeMembership
+
+PoolImpl *-- EndpointManager
+
+EndpointManager <|-- EndpointManagerImpl
+EndpointManagerImpl --> EndpointListenerBroadcaster : uses
+
+
+LocatorLoadSnapshot ---> LoadHolder : uses
+@enduml

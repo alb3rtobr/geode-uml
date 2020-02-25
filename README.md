@@ -17,3 +17,12 @@ They are not 100% complete (not even close!), I just wanted to have a picture of
 
 # Gateway Senders
 ![GwSenders](./uml/GwSenders-UML.png)
+
+# Advisors
+![Advisors](./uml/Advisors-UML.png)
+
+# Client-Server Connections
+![ClientServerConnections](./uml/ClientServerConnections-UML.png)
+
+# Ping task creation
+![PingTaskCreation](./uml/PingTaskCreationg-UML.png)

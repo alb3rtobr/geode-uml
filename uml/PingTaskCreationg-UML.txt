@@ -1,0 +1,15 @@
+@startuml
+-> PoolImpl : acquireConnection(SL)
+PoolImpl -> ConnectionManagerImpl: borrowConnection(SL,false)
+ConnectionManagerImpl -> ConnectionManagerImpl: forceCreateConnection(SL)
+ConnectionManagerImpl -> ConnectionManagerImpl: createPooledConnection(SL)
+ConnectionManagerImpl -> ConnectionFactoryImpl : createClientToServerConnection(SL,false)
+ConnectionFactoryImpl -> ConnectionConnector : connectClientToServer(SL,false)
+ConnectionConnector -> ConnectionImpl : connect(EndpointManager, SL, ....)
+ConnectionImpl -> EndpointManagerImpl : referenceEndpoint(SL,DistributedMember)
+EndpointManagerImpl -> EndpointListenerBroadcaster : endPointNowInUse(Endpoint)
+EndpointListenerBroadcaster -> LiveServerPinger : endPointNowInUse(Endpoint)
+LiveServerPinger -> PingTask : run2
+PingTask -> PingOp : execute(ExecutablePool, Endpoint)
+PingOp -> OpExecutorImpl : executeOn(Endpoint, PingOp ...)
+@enduml

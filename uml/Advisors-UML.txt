@@ -1,0 +1,35 @@
+@startuml
+class DistributionAdvisor {
+  Profile[] profiles
+  DistributionAdvisee advisee
+}
+note top:"Provides advice on sending distribution messages.\nFor a given operation, this advisor will provide\na list of recipients that a message should be sent to.\nEach distributed entity that can have remote counterparts\nmaintains an instance of DistributionAdvisor and maintains\nit by giving it a Profile for each of its remote\ncounterparts, and telling it to delete a profile when\nthat counterpart no longer exists."
+
+class ControllerAdvisor
+abstract class GridAdvisor {
+  List cachedBridgeServerProfiles // BridgeServerProfile
+  List cachedControllerProfiles     // ControllerProfile
+  Set cachedBridgeServerAdvise  // DistributedMember
+  Set cachedControllerAdvise      // DistributedMember
+}
+
+class GatewaySenderAdvisor {
+  AbstractGatewaySender sender
+}
+
+DistributionAdvisor <|-- GridAdvisor
+DistributionAdvisor <|-- GatewaySenderAdvisor
+GridAdvisor <|-- ControllerAdvisor 
+
+DistributionAdvisor *- DistributionAdvisee
+
+interface DistributionAdvisee
+note right: The resource getting advise\nfrom the DistributionAdvisor
+
+class ServerLocator {
+  ControllerAdvisor advisor
+  LocatorLoadSnapshot loadSnapshot
+}
+
+DistributionAdvisee <|-- ServerLocator
+@enduml
