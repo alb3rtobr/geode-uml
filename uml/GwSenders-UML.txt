@@ -1,5 +1,11 @@
 @startuml
-class AbstractGatewaySenderEventProcessor {
+abstract class AbstractGatewaySender {
+  - PoolImpl proxy
+  + PoolImpl getProxy()
+  AbstractGatewaySenderEventProcessor eventProcessor
+}
+
+abstract class AbstractGatewaySenderEventProcessor {
   GatewaySenderEventDispatcher dispatcher
 }
 
@@ -21,16 +27,34 @@ class GatewaySenderEventRemoteDispatcher {
 interface InternalGatewaySender
 interface DistributionAdvisee
 
-class AbstractGatewaySender {
-  - PoolImpl proxy
-  + PoolImpl getProxy()
+
+
+AbstractGatewaySender *-- AbstractGatewaySenderEventProcessor
+GatewaySenderEventRemoteDispatcher *-- AbstractGatewaySender
+
+class RemoteConcurrentSerialGatewaySenderEventProcessor 
+class ConcurrentSerialGatewaySenderEventProcessor{
+  AbstractGatewaySender sender
+  List<SerialGatewaySenderEventProcessor> processors
 }
 
-GatewaySenderEventRemoteDispatcher *-- AbstractGatewaySender
+SerialGatewaySenderEventProcessor --* ConcurrentSerialGatewaySenderEventProcessor
+
+AbstractGatewaySenderEventProcessor <|-- ConcurrentSerialGatewaySenderEventProcessor
+ConcurrentSerialGatewaySenderEventProcessor <|-- RemoteConcurrentSerialGatewaySenderEventProcessor
+
+
+
 
 InternalGatewaySender <|.. AbstractGatewaySender
 DistributionAdvisee <|.. AbstractGatewaySender
 
+
+class SerialGatewaySenderImpl
+abstract class AbstractRemoteGatewaySender
+
+AbstractGatewaySender <|-- AbstractRemoteGatewaySender
+AbstractRemoteGatewaySender <|-- SerialGatewaySenderImpl
 class PoolImpl{
   - ConnectionManager manager
   +Connection acquireConnection(ServerLocation loc)
@@ -40,7 +64,7 @@ class ConnectionManager{
   +Connection borrowConnection(ServerLocation server, boolean onlyUseExistingCnx)
 }
 
-AbstractGatewaySender *-- PoolImpl
+AbstractGatewaySender *---- PoolImpl
 PoolImpl *-- ConnectionManager
 
 note as N1
@@ -49,5 +73,15 @@ note as N1
   con = this.sender.getProxy().acquireConnection(server);
   
 end note
+
+note as N2
+  if dispatcher threads > 1:
+    eventProcessor = new RemoteConcurrentSerialGatewaySenderEventProcessor
+  else
+    eventProcessor = new RemoteSerialGatewaySenderEventProcessor
+end note
+
 GatewaySenderEventRemoteDispatcher .. N1
+
+SerialGatewaySenderImpl .. N2
 @enduml
